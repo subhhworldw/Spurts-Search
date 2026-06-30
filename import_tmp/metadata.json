@@ -1,0 +1,6 @@
+{
+  "name": "Spurt Search",
+  "description": "Unified biological databases search engine (GenBank, UniProt, PDB) with AI-powered summarizations and structured bookmarking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
