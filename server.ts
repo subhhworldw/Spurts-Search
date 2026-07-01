@@ -183,7 +183,7 @@ Provide ONLY the informative description. Avoid repetitive text, do not create a
     }
   } catch (apiError: any) {
     const errorStr = typeof apiError === "object" ? JSON.stringify(apiError) : (apiError.message || "");
-    const isTemporary = errorStr.includes("503") || errorStr.includes("UNAVAILABLE") || errorStr.includes("high demand") || errorStr.includes("429") || errorStr.includes("RESOURCE_EXHAUSTED") || errorStr.includes("quota");
+    const isTemporary = errorStr.includes("503") || errorStr.includes("UNAVAILABLE") || errorStr.includes("high demand") || errorStr.includes("429") || errorStr.includes("RESOURCE_EXHAUSTED");
     
     // If the user supplied a custom API key and it failed, check if it was temporary overload or actual invalid credentials
     if (userApiKey) {
