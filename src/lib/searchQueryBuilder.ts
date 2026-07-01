@@ -130,37 +130,74 @@ export function parseNaturalLanguageQuery(query: string): ParsedQuery {
 }
 
 export function buildNCBIQuery(parsed: ParsedQuery): string {
-  const allTerms = [...parsed.cleanedTerms, ...parsed.expandedTerms];
-  if (allTerms.length === 0) return "";
+  if (parsed.cleanedTerms.length === 0 && parsed.expandedTerms.length === 0) return "";
 
-  const base = allTerms.join(" OR ");
+  const cleanedPhrase = parsed.cleanedTerms.join(" ");
+  const cleanedNoSpace = parsed.cleanedTerms.join("");
+  
+  const searchItems = [];
+  if (cleanedPhrase) {
+     searchItems.push(`"${cleanedPhrase}"`);
+     if (cleanedPhrase !== cleanedNoSpace) {
+       searchItems.push(`"${cleanedNoSpace}"`);
+     }
+  }
+  if (parsed.expandedTerms.length > 0) {
+     searchItems.push(...parsed.expandedTerms.map(t => `"${t}"`));
+  }
+
+  const base = searchItems.join(" OR ");
   const org = parsed.organism ? ` AND "${parsed.organism}"[Organism]` : "";
-  return `(${base})[Gene Name] OR (${base})[Title]${org}`;
+  return `(${base})${org}`;
 }
 
 export function buildUniProtQuery(parsed: ParsedQuery): string {
-  const allTerms = [...parsed.cleanedTerms, ...parsed.expandedTerms];
-  if (allTerms.length === 0) return "";
+  if (parsed.cleanedTerms.length === 0 && parsed.expandedTerms.length === 0) return "";
+
+  const cleanedPhrase = parsed.cleanedTerms.join(" ");
+  const cleanedNoSpace = parsed.cleanedTerms.join("");
+  
+  const searchItems = [];
+  if (cleanedPhrase) {
+     searchItems.push(cleanedPhrase);
+     if (cleanedPhrase !== cleanedNoSpace) {
+       searchItems.push(cleanedNoSpace);
+     }
+  }
+  if (parsed.expandedTerms.length > 0) {
+     searchItems.push(...parsed.expandedTerms);
+  }
 
   // Create a combined query for each term
   // ?query=(gene:{term} OR protein_name:{term} OR ft_function:{term}) AND (organism_name:"{organism}") AND (reviewed:true)
-  const termQueries = allTerms.map(
-    (t) => `(gene_exact:${t} OR protein_name:${t} OR keyword:${t})`,
+  const termQueries = searchItems.map(
+    (t) => `(gene_exact:"${t}" OR protein_name:"${t}" OR keyword:"${t}")`,
   );
   const base = termQueries.join(" OR ");
   const org = parsed.organism
     ? ` AND (organism_name:"${parsed.organism}")`
     : "";
-  // Always restrict to reviewed entries for higher quality?
-  // Let's not strict restrict to reviewed yet just in case.
   return `(${base})${org}`;
 }
 
 export function buildPDBQuery(parsed: ParsedQuery): any {
-  const allTerms = [...parsed.cleanedTerms, ...parsed.expandedTerms];
-  if (allTerms.length === 0) return null;
+  if (parsed.cleanedTerms.length === 0 && parsed.expandedTerms.length === 0) return null;
 
-  const nodes = allTerms.map((t) => ({
+  const cleanedPhrase = parsed.cleanedTerms.join(" ");
+  const cleanedNoSpace = parsed.cleanedTerms.join("");
+  
+  const searchItems = [];
+  if (cleanedPhrase) {
+     searchItems.push(cleanedPhrase);
+     if (cleanedPhrase !== cleanedNoSpace) {
+       searchItems.push(cleanedNoSpace);
+     }
+  }
+  if (parsed.expandedTerms.length > 0) {
+     searchItems.push(...parsed.expandedTerms);
+  }
+
+  const nodes = searchItems.map((t) => ({
     type: "terminal",
     service: "full_text",
     parameters: { value: t },
@@ -186,7 +223,7 @@ export function buildPDBQuery(parsed: ParsedQuery): any {
         {
           type: "group",
           logical_operator: "or",
-          nodes: allTerms.map((t) => ({
+          nodes: searchItems.map((t) => ({
             type: "terminal",
             service: "full_text",
             parameters: { value: t },

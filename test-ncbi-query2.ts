@@ -1,0 +1,1 @@
+fetch('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=nucleotide&term=(brca%20OR%202)%5BGene%20Name%5D%20OR%20(brca%20OR%202)%5BTitle%5D&retmode=json&retmax=5').then(r=>r.json()).then(j=>console.log(j));

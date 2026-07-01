@@ -14,6 +14,8 @@ import GeminiKeyModal from "./components/GeminiKeyModal";
 import ConsentBanner from "./components/ConsentBanner";
 import AdvancedFiltersPanel from "./components/AdvancedFiltersPanel";
 import CompareModal from "./components/CompareModal";
+import SkeletonLoader from "./components/SkeletonLoader";
+import SearchStatus from "./components/SearchStatus";
 import { InfoButton } from "./components/InfoButton";
 import {
   parseNaturalLanguageQuery,
@@ -956,7 +958,7 @@ export default function App() {
                       undefined,
                   },
                 ];
-                appendProgressiveResults(hits);
+                wrappedAppendProgressiveResults(hits);
                 setApiStatus((prev) => ({ ...prev, pdb: "ok" }));
                 return;
               }
@@ -1558,6 +1560,8 @@ export default function App() {
               </div>
             )}
           </div>
+          
+          <SearchStatus apiStatus={apiStatus} isSearching={isLoading} />
 
           <AnimatePresence mode="wait">
             {isLoading ? (
@@ -1570,30 +1574,7 @@ export default function App() {
                 className="space-y-4"
               >
                 {[1, 2, 3].map((idx) => (
-                  <div
-                    key={`skeleton-${idx}`}
-                    className="w-full p-5 bg-brand-secondary border border-brand-border rounded-2xl shadow-xs space-y-4 text-left"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="flex gap-2.5 items-center">
-                        <div className="skeleton h-5 w-16" />
-                        <div className="skeleton h-4 w-28" />
-                        <div className="skeleton h-4 w-12" />
-                      </div>
-                      <div className="flex gap-2 shrink-0">
-                        <div className="skeleton h-8 w-16" />
-                        <div className="skeleton h-8 w-14" />
-                      </div>
-                    </div>
-                    <div className="space-y-2.5 py-1">
-                      <div className="skeleton h-6 w-2/3" />
-                      <div className="skeleton h-3.5 w-full" />
-                      <div className="skeleton h-3.5 w-4/5" />
-                    </div>
-                    <div className="flex items-center gap-2 pt-2">
-                      <div className="skeleton h-7 w-24" />
-                    </div>
-                  </div>
+                  <SkeletonLoader key={`skeleton-${idx}`} size="large" />
                 ))}
               </motion.div>
             ) : errorText ? (
@@ -1848,15 +1829,23 @@ export default function App() {
               >
                 Clear
               </button>
-              <button
+              <div
                 onClick={() => setIsCompareOpen(true)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setIsCompareOpen(true);
+                  }
+                }}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all cursor-pointer shadow-md"
               >
                 Compare Now
                 <div onClick={(e) => e.stopPropagation()} className="-mr-1">
                   <InfoButton tipKey="compare-mode" />
                 </div>
-              </button>
+              </div>
             </div>
           </motion.div>
         )}

@@ -1,0 +1,1 @@
+fetch('https://rest.uniprot.org/uniprotkb/search?query=(gene_exact:brca%20OR%20protein_name:brca%20OR%20keyword:brca)%20OR%20(gene_exact:2%20OR%20protein_name:2%20OR%20keyword:2)&format=json&size=5').then(r=>r.text()).then(t=>console.log(t));

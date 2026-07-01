@@ -1,0 +1,1 @@
+fetch('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=nucleotide&id=3347958392,3199427335,3199390344,3199365336,2017952444&retmode=json').then(r=>r.json()).then(j=>console.log(j.result['3347958392']));
