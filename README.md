@@ -12,17 +12,17 @@
 
 ## 📌 Overview
 
-**Spurt Search** is a high-throughput, open-source bioinformatics portal engineered to aggregate and accelerate information retrieval across genomic, proteomic, and structural biology domains. For research bioinformaticians, graduate students, and laboratory technicians, cross-referencing biological identifiers across fragmented public directories is a highly tedious, manual process that slows down exploratory workflows. Spurt Search integrates live API synchronization across three major scientific repositories—**NCBI GenBank** (genomics), **UniProt** (proteins), and the **RCSB Protein Data Bank** (3D macromolecular structures)—into a single, consolidated dashboard. Powered by Google's Gemini API, the engine dynamically synthesizes raw metadata into peer-reviewed-quality summaries, isolating physiological functions, taxon origins, and molecular applications in real time.
+**Spurt Search** is a high-throughput, open-source bioinformatics portal engineered to aggregate and accelerate information retrieval across genomic, proteomic, and structural biology domains. For[...]
 
 ---
 
 ## ✨ Key Features
 
-- 🔍 **Unified Single-Query Cross-Retrieval**: Query across NCBI GenBank (genomic DNA/RNA), UniProt (protein annotations), and PDB (structural coordinates) simultaneously. Eliminates the need to maintain multiple browser tabs or manually map ID accession formats.
-- 🧠 **AI-Powered Annotation Synthesis**: Dynamically orchestrates LLM pipelines using the `@google/genai` SDK (such as Gemini 3.5 Flash) to generate scientifically rich, context-aware functional summaries. Instantly extracts cell localization, active active sites, and research relevance from unformatted sequence records.
-- 💾 **Structured Bookmarking Panel**: Save vital sequence maps, protein sheets, and crystalline structures directly into a local workspace. Organizes historic logs and permits local annotation editing for research journals.
-- ⚡ **Real-Time Endpoint Live Tracking**: Built-in connectivity monitors that track active connection health directly to external bioinformatics endpoints, ensuring transparent API status and reliable retrievals.
-- 📤 **Batch Identifier Scanning**: Rapidly scan and compare lists of multiple gene, protein, or macromolecular accession codes simultaneously, returning clear side-by-side matrices for rapid assessment.
+- 🔍 **Unified Single-Query Cross-Retrieval**: Query across NCBI GenBank (genomic DNA/RNA), UniProt (protein annotations), and PDB (structural coordinates) simultaneously. Eliminates the need to[...]
+- 🧠 **AI-Powered Annotation Synthesis**: Dynamically orchestrates LLM pipelines using the `@google/genai` SDK (such as Gemini 3.5 Flash) to generate scientifically rich, context-aware functiona[...]
+- 💾 **Structured Bookmarking Panel**: Save vital sequence maps, protein sheets, and crystalline structures directly into a local workspace. Organizes historic logs and permits local annotation [...]
+- ⚡ **Real-Time Endpoint Live Tracking**: Built-in connectivity monitors that track active connection health directly to external bioinformatics endpoints, ensuring transparent API status and re[...]
+- 📤 **Batch Identifier Scanning**: Rapidly scan and compare lists of multiple gene, protein, or macromolecular accession codes simultaneously, returning clear side-by-side matrices for rapid as[...]
 
 ---
 
@@ -30,29 +30,29 @@
 
 #### 🖥️ Dashboard Interface
 ```
-┌────────────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────────┐
 │ 🧬 SPURT SEARCH | Unified Bio-Database retrieval                      │
-├────────────────────────────────────────────────────────────────────────┤
+├────────────────────────────────────────────────────────────────────┤
 │ [ NCBI GenBank ]          [ UniProt KB ]         [ Protein Data Bank ] │
 │ 🟢 Operational             🟢 Operational          🟢 Operational       │
-├────────────────────────────────────────────────────────────────────────┤
+├────────────────────────────────────────────────────────────────────┤
 │ [ Enter Accession IDs or Keywords... (e.g. BRCA1, p53, 1A8G) ] [Search]│
-└────────────────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────────┘
 ```
 *Figure 1: Main search interface featuring live system health status monitors, dynamic input fields supporting batch entries, and unified registry filters.*
 
 #### 🔬 AI-Generated Scientific Context Panel
 ```
-┌────────────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────────┐
 │ RESULT: UniProt - P04637 (Cellular tumor antigen p53)                  │
-├────────────────────────────────────────────────────────────────────────┤
+├────────────────────────────────────────────────────────────────────┤
 │ Organism: Homo sapiens | Molecular Weight: 43.7 kDa                     │
 │                                                                        │
 │ 🤖 GEMINI ANNOTATION:                                                  │
 │ "Acts as a tumor suppressor in many tumor types; co-operates with      │
 │ regulatory proteins to direct gene transcription, arrest cell growth,  │
 │ and induce apoptosis. Prominent target in molecular oncology research."│
-└────────────────────────────────────────────────────────────────────────┘
+└────────────────────────────────────────────────────────────────────┘
 ```
 *Figure 2: The result detail view showing raw database metadata juxtaposed with professional-grade molecular summaries generated by the Gemini AI pipeline.*
 
@@ -126,7 +126,7 @@ APP_URL="http://localhost:3000"
 ```
 
 > [!WARNING]
-> **API Key Security Alert**: Never commit your active `.env` file to public version control systems. The `.gitignore` file is pre-configured to exclude `.env` files. Ensure you use repository secrets (e.g., GitHub Secrets) when setting up CI/CD pipelines or cloud deployments.
+> **API Key Security Alert**: Never commit your active `.env` file to public version control systems. The `.gitignore` file is pre-configured to exclude `.env` files. Ensure you use repository secrets for production deployments.
 
 ---
 
@@ -135,26 +135,26 @@ APP_URL="http://localhost:3000"
 The following ASCII diagram illustrates the path of biological data and AI summaries through the system:
 
 ```
-                  ┌─────────────────────────────────┐
-                  │        User Interface           │
-                  │   (React 19 + Tailwind CSS)     │
-                  └────────────────┬───────────────▲┘
-                                   │               │
-                            1. Search Input    5. Render
-                                   │         Unified Cards
-                                   ▼               │
-                  ┌────────────────────────────────┴┘
-                  │         Express.js Server       │
-                  │        (Local Host Proxy)       │
-                  └────────────────┬───────────────▲┘
-                                   │               │
-                 2. Query IDs      │               │ 4. Synthesize
-                                   ▼               │    Annotations
-                  ┌────────────────┴┐   ┌──────────┴────────┐
-                  │  External APIs  │   │  Google Gemini   │
-                  │ (GenBank / PDB /│   │   API Models     │
-                  │    UniProt)     │   │(gemini-3.5-flash)│
-                  └─────────────────┘   └──────────────────┘
+                   ┌─────────────────────────────────┐
+                   │        User Interface           │
+                   │   (React 19 + Tailwind CSS)     │
+                   └────────────────┬───────────────▲┘
+                                    │               │
+                             1. Search Input    5. Render
+                                    │         Unified Cards
+                                    ▼               │
+                   ┌────────────────────────────────┴┘
+                   │         Express.js Server       │
+                   │        (Local Host Proxy)       │
+                   └────────────────┬───────────────▲┘
+                                    │               │
+                  2. Query IDs      │               │ 4. Synthesize
+                                    ▼               │    Annotations
+                   ┌────────────────┴┐   ┌──────────┴────────┐
+                   │  External APIs  │   │  Google Gemini   │
+                   │ (GenBank / PDB /│   │   API Models     │
+                   │    UniProt)     │   │(gemini-3.5-flash)│
+                   └─────────────────┘   └──────────────────┘
 ```
 
 ---
@@ -166,16 +166,16 @@ All backend communication with the Express.js proxy is routed through these API 
 | Endpoint | Method | Description |
 | :--- | :--- | :--- |
 | `/api/health` | `GET` | Health check route checking server status and verifying if the local `GEMINI_API_KEY` is active. |
-| `/api/summarize` | `POST` | Accepts biological metadata (`id`, `database`, `title`, `description`, `category`) and optionally a custom token override (`userApiKey`), returning a peer-reviewed quality annotation. |
+| `/api/summarize` | `POST` | Accepts biological metadata (`id`, `database`, `title`, `description`, `category`) and optionally a custom token override (`userApiKey`), returning a peer-reviewed query summary. |
 
 ---
 
 ## ⚠️ Known Limitations & Roadmap
 
 As an early-stage open-source bioinformatics workspace, Spurt Search operates with several design parameters:
-- ⏳ **Lack of Persistent Server Database**: Bookmarking is currently stored in the browser's `localStorage`. Multi-device synchronization and persistent cloud storage (such as Firestore) are scheduled for subsequent iterations.
+- ⏳ **Lack of Persistent Server Database**: Bookmarking is currently stored in the browser's `localStorage`. Multi-device synchronization and persistent cloud storage (such as Firestore) are scheduled.
 - 🛑 **Rate Limiting**: Downstream requests are subject to rate limiting from external scientific portals and Google's Gemini API endpoints.
-- 🧬 **Complex PDB Structures**: The PDB card provides direct structural coordinates and structural mapping links but does not currently include an inline WebGL 3D molecular viewer (e.g., Mol* or 3Dmol.js). Adding interactive 3D visualizations is highly prioritized on the project roadmap.
+- 🧬 **Complex PDB Structures**: The PDB card provides direct structural coordinates and structural mapping links but does not currently include an inline WebGL 3D molecular viewer (e.g., Mol*).
 
 ---
 
