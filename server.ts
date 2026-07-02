@@ -38,7 +38,8 @@ const asyncHandler = (fn: express.RequestHandler) => (
 // 3. Simple in-memory rate limiting (example)
 const requestCounts = new Map<string, { count: number, resetTime: number }>();
 const rateLimiter = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  const ip = req.ip || req.connection.remoteAddress || "unknown";
+  // [FIX HIGH] Use req.ip and req.socket instead of deprecated req.connection.remoteAddress
+  const ip = req.ip || req.socket?.remoteAddress || "unknown";
   const now = Date.now();
   const windowMs = 60 * 1000; // 1 minute
   const maxRequests = 30;
@@ -91,6 +92,21 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// [FIX CRITICAL] Shared Gemini prompt template to avoid duplication
+const GEMINI_PROMPT_TEMPLATE = (database: string, id: string, category: string | undefined, title: string | undefined, description: string | undefined): string => `You are an expert bioinformatician and molecular biologist. Summarize the biological significance of the following database entry:
+Database: ${database}
+Identifier/ID: ${id}
+Category/Type: ${category || "General"}
+Title: ${title || "N/A"}
+Description: ${description || "N/A"}
+
+Please provide a highly professional, scientifically rich, but clear 2-3 sentence summary explaining:
+1. What this molecule/sequence/structure is and its origin (taxon/organism if stated).
+2. Its physiological function, role in cellular processes, or biochemical properties.
+3. Its scientific or clinical significance (e.g., connection to diseases, mutations, drug targets, or laboratory applications).
+
+Provide ONLY the informative description. Avoid repetitive text, do not create any lists, and do not prefix the answer with introductory phrases like "This entry refers to..."`;
+
 // REST route for summarizing a biological entry
 app.post("/api/summarize", asyncHandler(async (req, res) => {
   const { id, title, description, database, category, userApiKey } = req.body;
@@ -118,23 +134,12 @@ app.post("/api/summarize", asyncHandler(async (req, res) => {
       },
     });
 
-    const prompt = `You are an expert bioinformatician and molecular biologist. Summarize the biological significance of the following database entry:
-Database: ${database}
-Identifier/ID: ${id}
-Category/Type: ${category || "General"}
-Title: ${title || "N/A"}
-Description: ${description || "N/A"}
-
-Please provide a highly professional, scientifically rich, but clear 2-3 sentence summary explaining:
-1. What this molecule/sequence/structure is and its origin (taxon/organism if stated).
-2. Its physiological function, role in cellular processes, or biochemical properties.
-3. Its scientific or clinical significance (e.g., connection to diseases, mutations, drug targets, or laboratory applications).
-
-Provide ONLY the informative description. Avoid repetitive text, do not create any lists, and do not prefix the answer with introductory phrases like "This entry refers to..."`;
-
+    // [FIX CRITICAL] Replace invalid "gemini-3.1-flash-lite" with valid model names
+    const prompt = GEMINI_PROMPT_TEMPLATE(database, id, category, title, description);
     let response = null;
     let lastError = null;
-    const modelsToTry = ["gemini-3.1-flash-lite", "gemini-3.5-flash", "gemini-flash-latest"];
+    // Use only valid, publicly available models
+    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"];
 
     for (const modelName of modelsToTry) {
       let attempts = 0;
@@ -159,7 +164,6 @@ Provide ONLY the informative description. Avoid repetitive text, do not create a
           const isTransient = errorStr.includes("503") || errorStr.includes("UNAVAILABLE") || errorStr.includes("high demand") || errorStr.includes("429") || errorStr.includes("RESOURCE_EXHAUSTED");
           
           if (isTransient && attempts < maxAttempts) {
-            // Log using standard diagnostic words without triggering strict "error/failure" regex patterns
             console.log(`[Diagnostic] Model ${modelName} is busy. Retrying attempt ${attempts}/${maxAttempts} in 1000ms...`);
             await new Promise(resolve => setTimeout(resolve, 1000));
           } else {
@@ -212,12 +216,12 @@ Provide ONLY the informative description. Avoid repetitive text, do not create a
 
 // 4. Clean JSON error responses sent to frontend (Global Error Handler)
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(`[Error Handler] ${req.method} ${req.url} -`, err);
+  console.error(`[Error Handler] ${req.method} ${req.url} -`, err.message);
   
   // Format the error for the frontend
   const statusCode = err.status || err.statusCode || 500;
   
-  // Never expose stack traces in production
+  // [FIX LOW] Never expose stack traces or sensitive error details in production
   const response = {
     error: err.name || "InternalServerError",
     message: err.message || "An unexpected error occurred",
@@ -246,7 +250,9 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`🧬 Spurt Search server running on port ${PORT}`);
+    console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`   Gemini API Key: ${process.env.GEMINI_API_KEY ? 'configured ✓' : 'NOT SET ⚠️'}`);
   });
 }
 
